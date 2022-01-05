@@ -1,13 +1,9 @@
 # Machine Learning Algorithms and Deep Learning Models we used in this Project:
     # Logistic Regression
-    # Ταξινοµητή XGBoost 
+    # XGBoost 
     # Naive Bayes 
+    # SVM 
     # Deep Learning Model: LSTM
-
-### Βήματα Κώδικα:
-    # Προεπεξεργασία Tweets
-    # Μετατροπή τους σε Διανύσματα
-    # Εκπαίδευση με βάσει το συναίσθημα χρησιμοποιώντας μοντέλα ταξινόμησης και αλγόριθμους βαθιάς μάθησης (LogReg, XGBoost, NaiveBayes, LSTM)
 
 # ---------------------------------------------------------------------------------------------------------- #
 
@@ -32,6 +28,7 @@ from nltk.stem import WordNetLemmatizer
 
 # sklearn
 from sklearn.naive_bayes import MultinomialNB
+from sklearn.svm import LinearSVC
 from sklearn.linear_model import LogisticRegression
 import xgboost as xgb
 # For evaluation
@@ -40,7 +37,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import confusion_matrix, classification_report
 
-# ---------------------------------------------------------------------------------------------------------- #
+# ------------------------------------ IMPORT THE DATASET ---------------------------------------------- #
 
 # Importing the dataset
 ENCODING_DATA ="ISO-8859-1"
@@ -58,7 +55,7 @@ ax.set_xticklabels(['Negative','Positive'], rotation=0)
 # Storing data in lists.
 text, sentiment = list(dataset['text']), list(dataset['sentiment'])
 
-# ---------------------------------------------------------------------------------------------------------- #
+# -------------------------------- EMOJIS & STOPWORD DEFINITIONS ------------------------------------ #
 
 # Defining dictionary containing all emojis with their meanings.
 emojis = {':)': 'smile', ':-)': 'smile', ';d': 'wink', ':-E': 'vampire', ':(': 'sad', 
@@ -89,9 +86,8 @@ stopwordlist = ['a', 'about', 'above', 'after', 'again', 'ain', 'all', 'am', 'an
              'why', 'will', 'with', 'won', 'y', 'you', "youd","youll", "youre",
              "youve", 'your', 'yours', 'yourself', 'yourselves']
 
-# ---------------------------------------------------------------------------------------------------------- #
+# --------------------------------------- PREPROCESSING ------------------------------------------------- #
 
-# Preprocessing Function (Clean the Data)
 def preprocess(textdata):
     processedText = []
     
@@ -141,7 +137,7 @@ t = time.time()
 # Processed Dataset
 processedtext = preprocess(text)
 print(f"Text Preprocessing complete.")
-print(f"Time Taken: {round(time.time()-t)} seconds")
+print(f"Time Taken: {round(time.time()-t)} seconds \n")
 
 # Ploting Word Clouds for Positive and Negative tweets from our dataset and see which words occur the most.
 data_neg = processedtext[:800000]
@@ -154,31 +150,18 @@ wcPos = WordCloud(max_words = 1000 , width = 1600 , height = 800, collocations=F
 plt.figure(figsize = (20,20))
 plt.imshow(wcPos)
 
-# ---------------------------------------------------------------------------------------------------------- #
+# ---------------------------- SPLITTING DATA INTO TRAINING AND TESTING DATA --------------------------------- #
 
-# Splitting Data to Training and Testing Data
 # Training Data: The dataset upon which the model would be trained on. Contains 95% data.
 # Test Data: The dataset upon which the model would be tested against. Contains 5% data.
 X_train, X_test, y_train, y_test = train_test_split(processedtext, sentiment, test_size = 0.05, random_state = 0)
 print(f'Data Split Complete.')
 
-# Data Vectorize - Tokenization
-# TF-IDF indicates what the importance of the word is in order to understand the document or dataset. 
-# Let us understand with an example:
-# Suppose you have a dataset where students write an essay on the topic, 
-# My House. In this dataset, the word a appears many times; 
-# it’s a high frequency word compared to other words in the dataset. 
-# The dataset contains other words like home, house, rooms and so on that appear less often, 
-# so their frequency are lower and they carry more information compared to the word. 
+# ----------------------------------- DATA VECTORIZATION - TOKENIZATION --------------------------------------- #
 
+# TF-IDF indicates what the importance of the word is in order to understand the document or dataset. 
 # TF-IDF Vectoriser converts a collection of raw documents to a matrix of TF-IDF features. 
 # The Vectoriser is usually trained on only the X_train dataset.
-
-# ngram_range: is the range of number of words in a sequence. 
-# [e.g "very expensive" is a 2-gram that is considered as an extra feature separately from "very" and "expensive" when you have a n-gram range of (1,2)]
-
-# max_features specifies the number of features to consider. 
-# [Ordered by feature frequency across the corpus].
 vectoriser = TfidfVectorizer(ngram_range=(1,2), max_features=500000)
 vectoriser.fit(X_train)
 print(f'Vectoriser fitted.')
@@ -190,7 +173,7 @@ X_train = vectoriser.transform(X_train)
 X_test  = vectoriser.transform(X_test)
 print(f'Data Transformation Complete. \n')
 
-# ---------------------------------------------------------------------------------------------------------- #
+# -------------------------------------- MODELS EVALUATION ------------------------------------------- #
 
 def model_Evaluate(model):
     
@@ -210,12 +193,13 @@ def model_Evaluate(model):
     labels = [f'{v1}\n{v2}' for v1, v2 in zip(group_names,group_percentages)]
     labels = np.asarray(labels).reshape(2,2)
 
-    sns.heatmap(cf_matrix, annot = labels, cmap = 'Blues',fmt = '',
-                xticklabels = categories, yticklabels = categories)
+    sns.heatmap(cf_matrix, annot = labels, cmap = 'Blues',fmt = '', xticklabels = categories, yticklabels = categories)
 
     plt.xlabel("Predicted Values", fontdict = {'size':14}, labelpad = 10)
     plt.ylabel("Actual Values"   , fontdict = {'size':14}, labelpad = 10)
     plt.title ("Confusion Matrix", fontdict = {'size':18}, pad = 20)
+
+    plt.show()
 
     print('Model Accuracy :',accuracy_score(y_test,y_pred))
 
@@ -230,12 +214,17 @@ nb_clf = MultinomialNB()
 nb_clf.fit(X_train,y_train)
 model_Evaluate(nb_clf)
 
+# SVM Classifier
+SVCmodel = LinearSVC()
+SVCmodel.fit(X_train, y_train)
+model_Evaluate(SVCmodel)
+
 # Logistic Regrassion
 LRmodel = LogisticRegression(C = 2, max_iter = 1000, n_jobs=-1)
 LRmodel.fit(X_train, y_train)
 model_Evaluate(LRmodel)
 
-# ---------------------------------------------------------------------------------------------------------- #
+# -------------------------------------- SAVING THE MODELS --------------------------------------------- #
 
 # Saving the Models for later use
 file = open('Vectoriser-ngram-(1,2).pickle','wb')
@@ -250,13 +239,53 @@ file = open('Sentiment-NB.pickle','wb')
 pickle.dump(nb_clf, file)
 file.close()
 
+file = open('Sentiment-SVC.pickle','wb')
+pickle.dump(SVCmodel, file)
+file.close()
+
 file = open('Sentiment-LR.pickle','wb')
 pickle.dump(LRmodel, file)
 file.close()
 
-# ---------------------------------------------------------------------------------------------------------- #
+# ----------------------------------------- LOAD MODELS --------------------------------------------------- #
 
-def load_models():
+def load_LRmodel():
+    # Load the vectoriser.
+    file = open('Vectoriser-ngram-(1,2).pickle', 'rb')
+    vectoriser = pickle.load(file)
+    file.close()
+    # Load the LR Model.
+    file = open('Sentiment-LR.pickle', 'rb')
+    LRmodel = pickle.load(file)
+    file.close()
+    
+    return vectoriser, LRmodel
+
+def load_SVMmodel():
+    # Load the vectoriser.
+    file = open('Vectoriser-ngram-(1,2).pickle', 'rb')
+    vectoriser = pickle.load(file)
+    file.close()
+    # Load the SVM Model.
+    file = open('Sentiment-SVC.pickle', 'rb')
+    SVCmodel = pickle.load(file)
+    file.close()
+    
+    return vectoriser, SVCmodel
+
+def load_NBmodel():
+    # Load the vectoriser.
+    file = open('Vectoriser-ngram-(1,2).pickle', 'rb')
+    vectoriser = pickle.load(file)
+    file.close()
+    # Load the Naive Bayes Model.
+    file = open('Sentiment-NB.pickle', 'rb')
+    nb_clf = pickle.load(file)
+    file.close()
+    
+    return vectoriser, nb_clf
+
+def load_XGBmodel():
     # Load the vectoriser.
     file = open('Vectoriser-ngram-(1,2).pickle', 'rb')
     vectoriser = pickle.load(file)
@@ -265,18 +294,9 @@ def load_models():
     file = open('Sentiment-XGB.pickle', 'rb')
     xgb_clf = pickle.load(file)
     file.close()
-    # Load the Naive Bayes Model.
-    file = open('Sentiment-NB.pickle', 'rb')
-    nb_clf = pickle.load(file)
-    file.close()
-    # Load the LR Model.
-    file = open('Sentiment-LR.pickle', 'rb')
-    LRmodel = pickle.load(file)
-    file.close()
     
-    return vectoriser, xgb_clf, nb_clf, LRmodel
-
-# ---------------------------------------------------------------------------------------------------------- #
+    return vectoriser, xgb_clf
+# ----------------------------------------- PREDICT -------------------------------------------------------- #
 
 def predict(vectoriser, model, text):
     # Predict the sentiment
@@ -291,18 +311,22 @@ def predict(vectoriser, model, text):
     # Convert the list into a Pandas DataFrame.
     df = pd.DataFrame(data, columns = ['text','sentiment'])
     df = df.replace([0,1], ["Negative","Positive"])
+
     return df
 
 # ---------------------------------------------------------------------------------------------------------- #
 
 if __name__=="__main__":
     # Loading the models.
-    vectoriser, xgb_clf, nb_clf, LRmodel = load_models()
+    vectoriser, LRmodel = load_LRmodel()
+    vectoriser, SVCmodel = load_LRmodel()
+    vectoriser, nb_clf = load_LRmodel()
+    vectoriser, xgb_clf = load_LRmodel()
 
     # Text to classify should be in a list.
-    text = ["I hate twitter",
-            "May the Force be with you.",
-            "Mr. Stark, I don't feel so good"]
+    text = ["Kerameos is the best Minister of Education.",
+            "The weather is good today",
+            "I don't like the weather today"]
 
     df1 = predict(vectoriser, xgb_clf, text)
     print(df1.head())
@@ -310,7 +334,14 @@ if __name__=="__main__":
     df2 = predict(vectoriser, nb_clf, text)
     print(df2.head())
 
-    df3 = predict(vectoriser, LRmodel, text)
+    df3 = predict(vectoriser, SVCmodel, text)
     print(df3.head())
+    
+    df4 = predict(vectoriser, LRmodel, text)
+    print(df4.head())
 
-
+# Accuracy Results:
+    # XGboost Acc: 77%
+    # Naive Bayes Acc: 81%
+    # SVC Acc: 82%
+    # LogistR Acc: 83%

@@ -45,7 +45,7 @@ from sklearn.metrics import confusion_matrix, classification_report
 # Importing the dataset
 ENCODING_DATA ="ISO-8859-1"
 COLUMN_NAMES = ["sentiment", "ids", "date", "flag", "user", "text"]
-dataset = pd.read_csv(r"C:\Project_DT\Dataset_2.csv", encoding=ENCODING_DATA, names=COLUMN_NAMES)
+dataset = pd.read_csv(r"Dataset_2.csv", encoding=ENCODING_DATA, names=COLUMN_NAMES)
 
 # Choose only the columns we want to use
 dataset = dataset[['sentiment','text']]

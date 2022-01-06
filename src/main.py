@@ -69,7 +69,7 @@ print(f'Data Split Complete.')
 vectoriser = TfidfVectorizer(ngram_range=(1,2), max_features=500000)
 vectoriser.fit(X_train)
 print(f'Vectoriser fitted.')
-print('No. of feature_words: ', len(vectoriser.get_feature_names()))
+print('Number of feature words: ', len(vectoriser.get_feature_names()))
 
 X_train = vectoriser.transform(X_train)
 X_test  = vectoriser.transform(X_test)

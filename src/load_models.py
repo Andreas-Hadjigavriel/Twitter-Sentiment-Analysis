@@ -7,7 +7,7 @@ def load_model(vect, model):
     file = open(f'{vect}.pickle', 'rb')
     vect = pickle.load(file)
     file.close()
-    # Load the LR Model.
+    # Load the Model.
     file = open(f'{model}.pickle', 'rb')
     model = pickle.load(file)
     file.close()

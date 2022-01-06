@@ -1,32 +1,22 @@
-# Models we used in this Project:
-    # Machine Learning Algorithms:
-        # Logistic Regression
-        # XGBoost 
-        # Naive Bayes 
-        # SVM 
-    # Deep Learning Algorithms:
-        # LSTM
+# ----------------------------------- IMPORTING DEPENDENCIES ---------------------------------------- #
 
-# ---------------------------------------------------------------------------------------------------------- #
-
+# project files
+from emojis_stopwords_def import *
+from preprocessing import preprocess
+from save_models import save_model
+from load_models import load_model
+from prediction import predict
+ 
 # time
 import time
 
 # utilities
-import re
-import pickle
 import numpy as np  
 import pandas as pd
 
 # plotting
 import seaborn as sns
-from wordcloud import WordCloud
 import matplotlib.pyplot as plt
-
-# nltkma
-import nltk
-nltk.download('all')
-from nltk.stem import WordNetLemmatizer
 
 # sklearn
 from sklearn.naive_bayes import MultinomialNB
@@ -39,9 +29,9 @@ from sklearn.model_selection import train_test_split
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import confusion_matrix, classification_report
 
-# ------------------------------------ IMPORT THE DATASET ---------------------------------------------- #
 
-# Importing the dataset
+# -------------------------------------- DATA COLLECTION ---------------------------------------------- #
+
 ENCODING_DATA ="ISO-8859-1"
 COLUMN_NAMES = ["sentiment", "ids", "date", "flag", "user", "text"]
 dataset = pd.read_csv(r"../Dataset_2.csv", encoding=ENCODING_DATA, names=COLUMN_NAMES)
@@ -57,113 +47,39 @@ ax.set_xticklabels(['Negative','Positive'], rotation=0)
 # Storing data in lists.
 text, sentiment = list(dataset['text']), list(dataset['sentiment'])
 
-# -------------------------------- EMOJIS & STOPWORD DEFINITIONS ------------------------------------ #
 
-# Defining dictionary containing all emojis with their meanings.
-emojis = {':)': 'smile', ':-)': 'smile', ';d': 'wink', ':-E': 'vampire', ':(': 'sad', 
-          ':-(': 'sad', ':-<': 'sad', ':P': 'raspberry', ':O': 'surprised',
-          ':-@': 'shocked', ':@': 'shocked',':-$': 'confused', ':\\': 'annoyed', 
-          ':#': 'mute', ':X': 'mute', ':^)': 'smile', ':-&': 'confused', '$_$': 'greedy',
-          '@@': 'eyeroll', ':-!': 'confused', ':-D': 'smile', ':-0': 'yell', 'O.o': 'confused',
-          '<(-_-)>': 'robot', 'd[-_-]b': 'dj', ":'-)": 'sadsmile', ';)': 'wink', 
-          ';-)': 'wink', 'O:-)': 'angel','O*-)': 'angel','(:-D': 'gossip', '=^.^=': 'cat'}
-
-# Defining List containing all stopwords
-# Stopwords are the English words which does not add much meaning to a sentence. 
-# They can safely be ignored without sacrificing the meaning of the sentence. (eg: "the", "he", "have")
-stopwordlist = ['a', 'about', 'above', 'after', 'again', 'ain', 'all', 'am', 'an', 'and','any','are', 'as', 
-                'at', 'be', 'because', 'been', 'before', 'being', 'below', 'between','both', 'by', 'can', 
-                'd', 'did', 'do', 'does', 'doing', 'down', 'during', 'each','few', 'for', 'from', 'further', 
-                'had', 'has', 'have', 'having', 'he', 'her', 'here', 'hers', 'herself', 'him', 'himself', 
-                'his', 'how', 'i', 'if', 'in', 'into','is', 'it', 'its', 'itself', 'just', 'll', 'm', 'ma',
-                'me', 'more', 'most','my', 'myself', 'now', 'o', 'of', 'on', 'once', 'only', 'or', 'other', 
-                'our', 'ours','ourselves', 'out', 'own', 're', 's', 'same', 'she', "shes", 'should', "shouldve",
-                'so', 'some', 'such', 't', 'than', 'that', "thatll", 'the', 'their', 'theirs', 'them',
-                'themselves', 'then', 'there', 'these', 'they', 'this', 'those', 'through', 'to', 'too','under', 
-                'until', 'up', 've', 'very', 'was', 'we', 'were', 'what', 'when', 'where','which','while', 'who', 
-                'whom', 'why', 'will', 'with', 'won', 'y', 'you', "youd","youll", "youre", "youve", 'your', 'yours', 
-                'yourself', 'yourselves']
-
-# --------------------------------------- PREPROCESSING ------------------------------------------------- #
-
-def preprocess(textdata):
-    processedText = []
-    
-    # Create Lemmatizer and Stemmer.
-    # Lemmatization is the process of converting a word to its base form. (e.g: “Great” to “Good”)
-    wordLemm = WordNetLemmatizer()
-    
-    # Defining regex patterns.
-    urlPattern        = r"((http://)[^ ]*|(https://)[^ ]*|( www\.)[^ ]*)"
-    userPattern       = '@[^\s]+'
-    alphaPattern      = "[^a-zA-Z0-9]"
-    sequencePattern   = r"(.)\1\1+"
-    seqReplacePattern = r"\1\1"
-    
-    for tweet in textdata:
-
-        # Each text is converted to lowercase
-        tweet = tweet.lower()
-        
-        # Replace all URls with 'URL'
-        tweet = re.sub(urlPattern,' URL',tweet)
-        # Replace all emojis.
-        for emoji in emojis.keys():
-            tweet = tweet.replace(emoji, "EMOJI" + emojis[emoji])        
-        # Replace @USERNAME to 'USER'.
-        tweet = re.sub(userPattern,' USER', tweet)        
-        # Replace all non alphabets.
-        tweet = re.sub(alphaPattern, " ", tweet)
-        # Replace 3 or more consecutive letters by 2 letter.
-        tweet = re.sub(sequencePattern, seqReplacePattern, tweet)
-
-        tweetwords = ''
-        for word in tweet.split():
-            # Checking if the word is a stopword.
-            #if word not in stopwordlist:
-            if len(word)>1:
-                # Lemmatizing the word.
-                word = wordLemm.lemmatize(word)
-                tweetwords += (word+' ')
-            
-        processedText.append(tweetwords)
-        
-    return processedText
+# --------------------------------- DATA PREPROCESSING/PREPARATION ------------------------------------ #
 
 # Process Time
 t = time.time()
 # Processed Dataset
-processedtext = preprocess(text)
+processedtext = preprocess(text)   
 print(f"Text Preprocessing complete.")
 print(f"Time Taken: {round(time.time()-t)} seconds \n")
 
-# ---------------------------- SPLITTING DATA INTO TRAINING AND TESTING DATA --------------------------------- #
 
-# Training Data: The dataset upon which the model would be trained on. Contains 95% data.
-# Test Data: The dataset upon which the model would be tested against. Contains 5% data.
+# ---------------------------- DATA SPLITTING TO TRAINING AND TESTING DATA ---------------------------- #
+
 X_train, X_test, y_train, y_test = train_test_split(processedtext, sentiment, test_size = 0.05, random_state = 0)
 print(f'Data Split Complete.')
 
-# ----------------------------------- DATA VECTORIZATION - TOKENIZATION --------------------------------------- #
 
-# TF-IDF indicates what the importance of the word is in order to understand the document or dataset. 
-# TF-IDF Vectoriser converts a collection of raw documents to a matrix of TF-IDF features. 
-# The Vectoriser is usually trained on only the X_train dataset.
+# --------------------------------------- DATA VECTORIZATION ------------------------------------------ #
+
 vectoriser = TfidfVectorizer(ngram_range=(1,2), max_features=500000)
 vectoriser.fit(X_train)
 print(f'Vectoriser fitted.')
 print('No. of feature_words: ', len(vectoriser.get_feature_names()))
 
-# Transforming the X_train and X_test dataset into matrix of TF-IDF Features by using the TF-IDF Vectoriser. 
-# This datasets will be used to train the model and test against it.
 X_train = vectoriser.transform(X_train)
 X_test  = vectoriser.transform(X_test)
-print(f'Data Transformation Complete. \n')
+print(f'Data Transformation to Vectors Completed. \n')
 
-# -------------------------------------- MODELS EVALUATION ------------------------------------------- #
+
+# ---------------------------------- MODEL ANALYSIS AND EVALUATION ------------------------------------ #
 
 def model_Evaluate(model):
-    
+
     # Predict values for Test dataset
     y_pred = model.predict(X_test)
     
@@ -190,7 +106,6 @@ def model_Evaluate(model):
 
     print('Model Accuracy :',accuracy_score(y_test,y_pred))
 
-
 # XGBoost Classifier
 xgb_clf = xgb.XGBClassifier(eval_metric='mlogloss',use_label_encoder=False)
 xgb_clf.fit(X_train,y_train)
@@ -211,109 +126,32 @@ LRmodel = LogisticRegression(C = 2, max_iter = 1000, n_jobs=-1)
 LRmodel.fit(X_train, y_train)
 model_Evaluate(LRmodel)
 
-# --------------------------------- SAVING THE MODELS (for later use) -------------------------------------- #
 
-file = open('Vectoriser-ngram-(1,2).pickle','wb')
-pickle.dump(vectoriser, file)
-file.close()
+# ---------------------------------------- SAVING THE MODELS ------------------------------------------ #
 
-file = open('Sentiment-XGB.pickle','wb')
-pickle.dump(xgb_clf, file)
-file.close()
+save_model(vectoriser)
+save_model(LRmodel)
+save_model(SVCmodel)
+save_model(nb_clf)
+save_model(xgb_clf)
 
-file = open('Sentiment-NB.pickle','wb')
-pickle.dump(nb_clf, file)
-file.close()
 
-file = open('Sentiment-SVC.pickle','wb')
-pickle.dump(SVCmodel, file)
-file.close()
-
-file = open('Sentiment-LR.pickle','wb')
-pickle.dump(LRmodel, file)
-file.close()
-
-# ----------------------------------------- LOAD MODELS --------------------------------------------------- #
-
-def load_LRmodel():
-    # Load the vectoriser.
-    file = open('Vectoriser-ngram-(1,2).pickle', 'rb')
-    vectoriser = pickle.load(file)
-    file.close()
-    # Load the LR Model.
-    file = open('Sentiment-LR.pickle', 'rb')
-    LRmodel = pickle.load(file)
-    file.close()
-    
-    return vectoriser, LRmodel
-
-def load_SVMmodel():
-    # Load the vectoriser.
-    file = open('Vectoriser-ngram-(1,2).pickle', 'rb')
-    vectoriser = pickle.load(file)
-    file.close()
-    # Load the SVM Model.
-    file = open('Sentiment-SVC.pickle', 'rb')
-    SVCmodel = pickle.load(file)
-    file.close()
-    
-    return vectoriser, SVCmodel
-
-def load_NBmodel():
-    # Load the vectoriser.
-    file = open('Vectoriser-ngram-(1,2).pickle', 'rb')
-    vectoriser = pickle.load(file)
-    file.close()
-    # Load the Naive Bayes Model.
-    file = open('Sentiment-NB.pickle', 'rb')
-    nb_clf = pickle.load(file)
-    file.close()
-    
-    return vectoriser, nb_clf
-
-def load_XGBmodel():
-    # Load the vectoriser.
-    file = open('Vectoriser-ngram-(1,2).pickle', 'rb')
-    vectoriser = pickle.load(file)
-    file.close()
-    # Load the XGBoost Model.
-    file = open('Sentiment-XGB.pickle', 'rb')
-    xgb_clf = pickle.load(file)
-    file.close()
-    
-    return vectoriser, xgb_clf
-# ----------------------------------------- PREDICT -------------------------------------------------------- #
-
-def predict(vectoriser, model, text):
-    # Predict the sentiment
-    textdata = vectoriser.transform(preprocess(text))
-    sentiment = model.predict(textdata)
-    
-    # Make a list of text with sentiment.
-    data = []
-    for text, pred in zip(text, sentiment):
-        data.append((text,pred))
-        
-    # Convert the list into a Pandas DataFrame.
-    df = pd.DataFrame(data, columns = ['text','sentiment'])
-    df = df.replace([0,1], ["Negative","Positive"])
-
-    return df
-
-# ---------------------------------------------------------------------------------------------------------- #
+# --------------------------------------------- MAIN -------------------------------------------------- #
 
 if __name__=="__main__": 
-    # Loading the models.
-    vectoriser, LRmodel = load_LRmodel()
-    vectoriser, SVCmodel = load_LRmodel()
-    vectoriser, nb_clf = load_LRmodel()
-    vectoriser, xgb_clf = load_LRmodel()
+    # Loading the models
+    vectoriser, xgb_clf = load_model(vectoriser, xgb_clf)
+    vectoriser, nb_clf = load_model(vectoriser, nb_clf)
+    vectoriser, SVCmodel = load_model(vectoriser, SVCmodel)
+    vectoriser, LRmodel = load_model(vectoriser, LRmodel)
+    
+    print(f'\n Tweets Sentiment Prediction')
 
-    # Text to classify should be in a list.
-    text = ["Kerameos is the best Minister of Education.",
-            "The weather is good today",
+    # Text to classify
+    text = ["The weather is good today",
             "I don't like the weather today"]
 
+    # Prediction 
     df1 = predict(vectoriser, xgb_clf, text)
     print(df1.head())
 
@@ -325,9 +163,3 @@ if __name__=="__main__":
     
     df4 = predict(vectoriser, LRmodel, text)
     print(df4.head())
-
-# Accuracy Results:
-    # XGboost Acc: 77%
-    # Naive Bayes Acc: 81%
-    # SVC Acc: 82%
-    # LogistR Acc: 83%

@@ -2,13 +2,13 @@
 
 import pickle
 
-def load_model(vect, model):
+def load_model(vectFilename, modelFilename):
     # Load the vectoriser.
-    file = open(f'{vect}.pickle', 'rb')
+    file = open(f'{vectFilename}.pickle', 'rb')
     vect = pickle.load(file)
     file.close()
     # Load the Model.
-    file = open(f'{model}.pickle', 'rb')
+    file = open(f'{modelFilename}.pickle', 'rb')
     model = pickle.load(file)
     file.close()
     

@@ -128,22 +128,27 @@ model_Evaluate(LRmodel)
 
 
 # ---------------------------------------- SAVING THE MODELS ------------------------------------------ #
+vectoriserFilename ="Vectoriser"
+lrFilename = "LogisticRegression"
+svcFilename = "LinearSVC"
+nbFilename = "MultinomialNB"
+xgbFilename = "XGBClassifier"
 
-save_model(vectoriser)
-save_model(LRmodel)
-save_model(SVCmodel)
-save_model(nb_clf)
-save_model(xgb_clf)
+save_model(vectoriser, vectoriserFilename)
+save_model(LRmodel, lrFilename)
+save_model(SVCmodel, svcFilename)
+save_model(nb_clf, nbFilename)
+save_model(xgb_clf, xgbFilename)
 
 
 # --------------------------------------------- MAIN -------------------------------------------------- #
 
 if __name__=="__main__": 
     # Loading the models
-    vectoriser, xgb_clf = load_model(vectoriser, xgb_clf)
-    vectoriser, nb_clf = load_model(vectoriser, nb_clf)
-    vectoriser, SVCmodel = load_model(vectoriser, SVCmodel)
-    vectoriser, LRmodel = load_model(vectoriser, LRmodel)
+    vectoriser, xgb_clf = load_model(vectoriserFilename, xgbFilename)
+    vectoriser, nb_clf = load_model(vectoriserFilename, nbFilename)
+    vectoriser, SVCmodel = load_model(vectoriserFilename, svcFilename)
+    vectoriser, LRmodel = load_model(vectoriserFilename, lrFilename)
     
     print(f'\n Tweets Sentiment Prediction')
 
@@ -153,7 +158,7 @@ if __name__=="__main__":
 
     # Prediction 
     df1 = predict(vectoriser, xgb_clf, text)
-    print(df1.head())
+    print(df1.head())   
 
     df2 = predict(vectoriser, nb_clf, text)
     print(df2.head())

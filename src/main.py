@@ -1,6 +1,4 @@
-
 # --------------------------------------------- MAIN -------------------------------------------------- #
-
 from prediction import predict 
 from load_models import load_model
 

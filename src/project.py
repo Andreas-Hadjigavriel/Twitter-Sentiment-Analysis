@@ -4,8 +4,6 @@
 from emojis_stopwords_def import *
 from preprocessing import preprocess
 from save_models import save_model
-from load_models import load_model
-from prediction import predict
  
 # time
 import time

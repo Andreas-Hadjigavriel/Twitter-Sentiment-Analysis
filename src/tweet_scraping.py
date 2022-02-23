@@ -9,10 +9,10 @@ import tweepy
 def scrape(words, date_since, numtweet):
     # Enter your own credentials obtained
     # from your developer account
-    consumer_key = "81vbRbjOgE5IfMlpc6Th3hAfF"
-    consumer_secret = "dz4bKqd2qHTbC4u9WyflgOEtQA4ypl3Wf0FRIhMUoJePJbO5nM"
-    access_key = "1473799519011753989-KwZASLFzHJaedhxmicKNaXkOAoyPAD"
-    access_secret = "Hi94rN2sLJ4HJDEqcNahtuNP1PLePcEFcui3ks7kFipyN"
+    consumer_key = "Add consumer key"
+    consumer_secret = "Add consumer secret key"
+    access_key = "Add access key"
+    access_secret = "Add access secret key"
 
 
     auth = tweepy.OAuthHandler(consumer_key, consumer_secret)

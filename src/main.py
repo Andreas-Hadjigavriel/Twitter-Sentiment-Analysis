@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-version https://git-lfs.github.com/spec/v1
-oid sha256:afb3b9070473165a5e756a70d3ca0814f1a35aae547f82bf78f790f5fd7937bf
-size 3134
-=======
 # --------------------------------------------- MAIN -------------------------------------------------- #
 from prediction import predict 
 from load_models import load_model
@@ -103,7 +98,3 @@ if __name__=="__main__":
         temp.append((i, predict_class(i)))
     pr6 = pd.DataFrame(temp, columns = ['text','sentiment'])
     print(pr6.head())
-
-    pr5 = predict(vectoriser, decision_tree, text)
-    print(pr5.head()) 
->>>>>>> 6e7528d172005e64a9ab3a4c544cdaeb814a1053

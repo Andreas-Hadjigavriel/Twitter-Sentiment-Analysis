@@ -44,12 +44,14 @@ if __name__=="__main__":
     xgbFilename = "XGBClassifier"
     dtcFilename = "DTClassifier"
     lstmFilename = 'LSTM'
+    dtFilename = "DecTree"
 
     # Loading the models
     vectoriser, xgb_clf = load_model(vectoriserFilename, xgbFilename)
     vectoriser, nb_clf = load_model(vectoriserFilename, nbFilename)
     vectoriser, SVCmodel = load_model(vectoriserFilename, svcFilename)
     vectoriser, LRmodel = load_model(vectoriserFilename, lrFilename)
+
     vectoriser, dtc_clf = load_model(vectoriserFilename, dtcFilename)
     
     print(f'\n Tweets Sentiment Prediction')
@@ -57,6 +59,17 @@ if __name__=="__main__":
     df = pd.read_csv('scraped_tweets.csv') 
 
     text = df['text'].to_list()
+
+    vectoriser, decision_tree = load_model(vectoriserFilename, dtFilename)
+
+    
+    print(f'\n Tweets Sentiment Prediction')
+
+    # Tweets to classify
+    text = ["The weather is good today", 
+                "The weather is not as good as yesterday",
+                "The bad weather is good for people"]
+
     
     # Prediction based on each model
     print("------------ XGBoost ------------")
@@ -85,3 +98,6 @@ if __name__=="__main__":
         temp.append((i, predict_class(i)))
     pr6 = pd.DataFrame(temp, columns = ['text','sentiment'])
     print(pr6.head())
+
+    pr5 = predict(vectoriser, decision_tree, text)
+    print(pr5.head()) 

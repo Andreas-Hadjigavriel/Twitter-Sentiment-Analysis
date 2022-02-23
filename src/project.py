@@ -8,6 +8,7 @@ from save_models import save_model
 # time
 import time
 
+
 # utilities
 import numpy as np  
 import pandas as pd
@@ -21,6 +22,8 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.svm import LinearSVC
 from sklearn.linear_model import LogisticRegression
 import xgboost as xgb
+from sklearn.tree import DecisionTreeClassifier 
+
 # For evaluation
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import train_test_split
@@ -44,7 +47,6 @@ ax = dataset.groupby('sentiment').count().plot(kind='bar', title='Distribution o
 ax.set_xticklabels(['Negative','Positive'], rotation=0)
 # Storing data in lists.
 text, sentiment = list(dataset['text']), list(dataset['sentiment'])
-
 
 # --------------------------------- DATA PREPROCESSING/PREPARATION ------------------------------------ #
 
@@ -71,6 +73,8 @@ print('Number of feature words: ', len(vectoriser.get_feature_names()))
 
 X_train = vectoriser.transform(X_train)
 X_test  = vectoriser.transform(X_test)
+print(X_test.shape)
+print(X_train.shape)
 print(f'Data Transformation to Vectors Completed. \n')
 
 
@@ -124,6 +128,11 @@ LRmodel = LogisticRegression(C = 2, max_iter = 1000, n_jobs=-1)
 LRmodel.fit(X_train, y_train)
 model_Evaluate(LRmodel)
 
+# Decision Tree Classifier
+dtc_clf = DecisionTreeClassifier(criterion='entropy', max_depth=2, random_state=0)
+dtc_clf.fit(X_train,y_train)
+model_Evaluate(dtc_clf)
+
 
 # ---------------------------------------- SAVING THE MODELS ------------------------------------------ #
 
@@ -132,12 +141,11 @@ lrFilename = "LogisticRegression"
 svcFilename = "LinearSVC"
 nbFilename = "MultinomialNB"
 xgbFilename = "XGBClassifier"
+dtcFilename = "DTClassifier"
 
 save_model(vectoriser, vectoriserFilename)
 save_model(LRmodel, lrFilename)
 save_model(SVCmodel, svcFilename)
 save_model(nb_clf, nbFilename)
 save_model(xgb_clf, xgbFilename)
-
-
-
+save_model(dtc_clf, dtcFilename)

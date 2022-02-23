@@ -1,20 +1,3 @@
-# ----------------------------------------- MODEL PREDICTION -------------------------------------------------------- #
-
-from preprocessing import preprocess
-import pandas as pd
-
-def predict(vectoriser, model, text):
-    # Predict the sentiment
-    textdata = vectoriser.transform(preprocess(text))
-    sentiment = model.predict(textdata)
-    
-    # Make a list of text with sentiment.
-    data = []
-    for text, pred in zip(text, sentiment):
-        data.append((text,pred))
-        
-    # Convert the list into a Pandas DataFrame.
-    df = pd.DataFrame(data, columns = ['text','sentiment'])
-    df = df.replace([0,1], ["Negative","Positive"])
-
-    return df
+version https://git-lfs.github.com/spec/v1
+oid sha256:27e2651c5720e97352132c2f49725bb663268370dbd611fc6e8a2b6de99146ed
+size 681

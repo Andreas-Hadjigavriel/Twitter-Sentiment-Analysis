@@ -35,7 +35,6 @@ if __name__=="__main__":
     # number of tweets you want to extract in one run
     numtweet = 100
     scrape(words, date_since, numtweet)
-    print('Scraping has completed!')
 
     vectoriserFilename ="Vectoriser"
     lrFilename = "LogisticRegression"
@@ -44,55 +43,40 @@ if __name__=="__main__":
     xgbFilename = "XGBClassifier"
     dtcFilename = "DTClassifier"
     lstmFilename = 'LSTM'
-    dtFilename = "DecTree"
 
     # Loading the models
     vectoriser, xgb_clf = load_model(vectoriserFilename, xgbFilename)
     vectoriser, nb_clf = load_model(vectoriserFilename, nbFilename)
     vectoriser, SVCmodel = load_model(vectoriserFilename, svcFilename)
     vectoriser, LRmodel = load_model(vectoriserFilename, lrFilename)
-
     vectoriser, dtc_clf = load_model(vectoriserFilename, dtcFilename)
-    
-    print(f'\n Tweets Sentiment Prediction')
 
     df = pd.read_csv('scraped_tweets.csv') 
 
     text = df['text'].to_list()
-
-    vectoriser, decision_tree = load_model(vectoriserFilename, dtFilename)
-
-    
-    print(f'\n Tweets Sentiment Prediction')
-
-    # Tweets to classify
-    text = ["The weather is good today", 
-                "The weather is not as good as yesterday",
-                "The bad weather is good for people"]
-
     
     # Prediction based on each model
-    print("------------ XGBoost ------------")
+    print(f"-------------------------- XGBoost ---------------------------")
     pr1 = predict(vectoriser, xgb_clf, text)
     print(pr1.head())   
 
-    print("------------ Multinomial Naive Bayes ------------")
+    print(f"\n------------------ Multinomial Naive Bayes -------------------")
     pr2 = predict(vectoriser, nb_clf, text)
     print(pr2.head())
 
-    print("------------ Linear SVC ------------")
+    print(f"\n------------------------- Linear SVC -------------------------")
     pr3 = predict(vectoriser, SVCmodel, text)
     print(pr3.head())
     
-    print("------------ Linear Regression ------------")
+    print(f"\n---------------------- Linear Regression ---------------------")
     pr4 = predict(vectoriser, LRmodel, text)
     print(pr4.head())
 
-    print("------------ Decision Tree ------------")
+    print(f"\n----------------------- Decision Tree ------------------------")
     pr5 = predict(vectoriser, dtc_clf, text)
     print(pr5.head())
 
-    print("------------ LSTM ------------")
+    print(f"\n---------------------------- LSTM ----------------------------")
     temp = []
     for i in text:
         temp.append((i, predict_class(i)))
